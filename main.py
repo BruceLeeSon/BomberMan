@@ -1,12 +1,9 @@
 import arcade
 
 from game import Game
+import constants
 
-SCREEN_WIDTH = 660
-SCREEN_HEIGHT = 660
-SCREEN_TITLE = 'BombasticMan'
-
-window = Game(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
+window = Game(constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT, constants.SCREEN_TITLE)
 window.setup()
 
 arcade.run()
