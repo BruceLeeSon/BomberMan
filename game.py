@@ -6,6 +6,8 @@ class SolidBlock(arcade.Sprite):
     def __init__(self):
         super().__init__("Blocks/SolidBlock.png", 1)
 
+
+
 class Game(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
@@ -13,7 +15,13 @@ class Game(arcade.Window):
         self.solid_blocks = arcade.SpriteList()
 
     def setup(self):
-        pass
+        for y in range(constants.ROW_COUNT):
+            for x in range(constants.COLUMN_COUNT):
+                if x % 2 == 1 and y % 2 == 1:
+                    solid_block = SolidBlock()
+                    solid_block.center_x = x * constants.CELL_WIDTH
+                    solid_block.center_y = y * constants.CELL_HEIGHT
+                    self.solid_blocks.append(solid_block)
 
     def draw_background(self):
         for y in range(constants.ROW_COUNT):
