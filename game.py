@@ -63,18 +63,26 @@ class Game(arcade.Window):
 
     def update(self, delta_time: float):
         self.player1.update_animation(delta_time)
+        self.player1.update()
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.LEFT:
             self.player1.direction = 1
+            self.player1.change_x = -10
         elif symbol == arcade.key.RIGHT:
+            self.player1.change_x = 10
             self.player1.direction = 2
         elif symbol == arcade.key.UP:
             self.player1.direction = 3
+            self.player1.change_y = 10
         elif symbol == arcade.key.DOWN:
             self.player1.direction = 4
+            self.player1.change_y = -10
+
 
         self.player1.change_costume()
 
     def on_key_release(self, symbol: int, modifiers: int):
-        pass
+        if symbol == arcade.key.LEFT or arcade.key.RIGHT or arcade.key.DOWN or arcade.key.UP:
+            self.player1.change_x = 0
+            self.player1.change_y = 0

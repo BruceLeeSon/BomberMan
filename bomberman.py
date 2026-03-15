@@ -26,3 +26,7 @@ class BomberMan(animate.Animate):
             self.textures = self.walk_up_frames
         elif self.direction == 4:
             self.textures = self.walk_down_frames
+
+    def update(self):
+        self.center_x += self.change_x
+        self.center_y += self.change_y
