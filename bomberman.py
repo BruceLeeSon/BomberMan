@@ -5,6 +5,7 @@ class BomberMan(animate.Animate):
     def __init__(self):
         super().__init__("Bomberman/Front/Bman_F_f00.png", 0.5)
         self.direction = 4
+        self.motion = 0
 
         self.walk_down_frames = []
         self.walk_up_frames = []
@@ -30,3 +31,32 @@ class BomberMan(animate.Animate):
     def update(self):
         self.center_x += self.change_x
         self.center_y += self.change_y
+
+    def to_up(self):
+        if not self.motion:
+            self.motion = 1
+            self.direction = 3
+            self.change_y = 10
+
+    def to_left(self):
+        if not self.motion:
+            self.motion = 1
+            self.direction = 1
+            self.change_x = -10
+
+    def to_right(self):
+        if not self.motion:
+            self.motion = 1
+            self.change_x = 10
+            self.direction = 2
+
+    def to_down(self):
+        if not self.motion:
+            self.motion = 1
+            self.direction = 4
+            self.change_y = -10
+
+    def to_stop(self):
+        self.motion = 0
+        self.change_x = 0
+        self.change_y = 0
