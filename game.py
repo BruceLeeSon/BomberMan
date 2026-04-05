@@ -1,7 +1,15 @@
 import arcade
+
+import animate
 import constants
 import random
 from bomberman import BomberMan
+
+
+class Bomb(animate.Animate):
+        def __init__(self):
+            super().__init__("Bomb/Bomb_f00.png", 0.7)
+
 
 class ExplodableBlock(arcade.Sprite):
     def __init__(self):
@@ -19,8 +27,9 @@ class Game(arcade.Window):
         self.bg_tile = arcade.load_texture("Blocks/BackgroundTile.png")
         self.solid_blocks = arcade.SpriteList()
         self.explodable_blocks = arcade.SpriteList()
-        self.player1 = BomberMan()
-        self.player2 = BomberMan()
+        self.player1 = BomberMan(self,constants.PLAYER1_SPEED)
+        self.player2 = BomberMan(self,constants.PLAYER2_SPEED)
+
 
     def setup(self):
         for y in range(constants.ROW_COUNT):
@@ -83,7 +92,6 @@ class Game(arcade.Window):
             self.player1.to_up()
         elif symbol == arcade.key.DOWN:
             self.player1.to_down()
-
 
         self.player1.change_costume()
 
