@@ -6,9 +6,25 @@ import random
 from bomberman import BomberMan
 
 
+def justify_x(position_x):
+    for x in range(constants.COLUMN_COUNT):
+        cell_center_x = x * constants.CELL_WIDTH + constants.CELL_WIDTH / 2
+        if position_x - cell_center_x <= constants.CELL_WIDTH / 2:
+            return cell_center_x
+
+def justify_y(position_y):
+    for y in range(constants.ROW_COUNT):
+        cell_center_y = y * constants.CELL_HEIGHT + constants.CELL_HEIGHT / 2
+        if position_y - cell_center_y <= constants.CELL_HEIGHT / 2:
+            return cell_center_y
+
+
+
 class Bomb(animate.Animate):
-        def __init__(self):
-            super().__init__("Bomb/Bomb_f00.png", 0.7)
+    def __init__(self):
+        super().__init__("Bomb/Bomb_f00.png", 0.7)
+        for i in range(3):
+            self.append_texture(arcade.load_texture(f"Bomb/Bomb_f0{i}.png"))
 
 
 class ExplodableBlock(arcade.Sprite):
@@ -27,9 +43,10 @@ class Game(arcade.Window):
         self.bg_tile = arcade.load_texture("Blocks/BackgroundTile.png")
         self.solid_blocks = arcade.SpriteList()
         self.explodable_blocks = arcade.SpriteList()
-        self.player1 = BomberMan(self,constants.PLAYER1_SPEED)
-        self.player2 = BomberMan(self,constants.PLAYER2_SPEED)
+        self.player1 = BomberMan(self, constants.PLAYER1_SPEED)
+        self.player2 = BomberMan(self, constants.PLAYER2_SPEED)
 
+        self.player1_bombs = arcade.SpriteList()
 
     def setup(self):
         for y in range(constants.ROW_COUNT):
@@ -76,12 +93,17 @@ class Game(arcade.Window):
         self.player1.draw()
         self.player2.draw()
 
+        self.player1_bombs.draw()
+
     def update(self, delta_time: float):
         self.player1.update_animation(delta_time)
         self.player1.update()
 
         self.player2.update_animation(delta_time)
         self.player2.update()
+
+        self.player1_bombs.update()
+        self.player1_bombs.update_animation(delta_time)
 
     def on_key_press(self, symbol: int, modifiers: int):
         if symbol == arcade.key.LEFT:
@@ -93,8 +115,16 @@ class Game(arcade.Window):
         elif symbol == arcade.key.DOWN:
             self.player1.to_down()
 
+        if symbol == arcade.key.C:
+            bomb = Bomb()
+            bomb.center_x = justify_x(self.player1.center_x)
+            bomb.center_y = justify_y(self.player1.center_y)
+            self.player1_bombs.append(bomb)
+
+
         self.player1.change_costume()
 
+        # Player 2
         if symbol == arcade.key.A:
             self.player2.to_left()
         elif symbol == arcade.key.D:
@@ -105,6 +135,7 @@ class Game(arcade.Window):
             self.player2.to_down()
 
         self.player2.change_costume()
+
 
     def on_key_release(self, symbol: int, modifiers: int):
         if symbol == arcade.key.LEFT or arcade.key.RIGHT or arcade.key.DOWN or arcade.key.UP:
