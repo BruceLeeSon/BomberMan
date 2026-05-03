@@ -4,13 +4,13 @@ import constants
 
 
 class BomberMan(animate.Animate):
-    def __init__(self, window, speed):
+    def __init__(self, window, speed, bombs_count):
         super().__init__("Bomberman/Front/Bman_F_f00.png", 0.5)
         self.direction = 4
         self.motion = 0
 
         self.speed = speed
-
+        self.bombs_count = bombs_count
         self.window = window
 
         self.walk_down_frames = []

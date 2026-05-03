@@ -4,6 +4,8 @@ import animate
 import constants
 import random
 from bomberman import BomberMan
+from constants import PLAYER2_BOMB_COUNT
+import time
 
 
 def justify_x(position_x):
@@ -25,7 +27,13 @@ class Bomb(animate.Animate):
         super().__init__("Bomb/Bomb_f00.png", 0.7)
         for i in range(3):
             self.append_texture(arcade.load_texture(f"Bomb/Bomb_f0{i}.png"))
+        self.spawn_time = time.time()
 
+    def update(self):
+        if time.time() - self.spawn_time > 3:
+            exp = Explosion()
+            exp.center_x = self.center_x
+            exp.center_y = self.center_y
 
 class ExplodableBlock(arcade.Sprite):
     def __init__(self):
@@ -36,6 +44,11 @@ class SolidBlock(arcade.Sprite):
     def __init__(self):
         super().__init__("Blocks/SolidBlock.png", 1)
 
+class Explosion(animate.Animate):
+    def __init__(self):
+        super().__init__("Flame/Flame_f00.png", 0.7)
+        for i in range(5):
+            self.append_texture(arcade.load_texture(f"Flame/Flame_f0{i}.png"))
 
 class Game(arcade.Window):
     def __init__(self, width, height, title):
@@ -43,8 +56,8 @@ class Game(arcade.Window):
         self.bg_tile = arcade.load_texture("Blocks/BackgroundTile.png")
         self.solid_blocks = arcade.SpriteList()
         self.explodable_blocks = arcade.SpriteList()
-        self.player1 = BomberMan(self, constants.PLAYER1_SPEED)
-        self.player2 = BomberMan(self, constants.PLAYER2_SPEED)
+        self.player1 = BomberMan(self, constants.PLAYER1_SPEED, constants.PLAYER1_BOMB_COUNT)
+        self.player2 = BomberMan(self, constants.PLAYER2_SPEED, constants.PLAYER2_BOMB_COUNT)
 
         self.player1_bombs = arcade.SpriteList()
 
@@ -116,10 +129,11 @@ class Game(arcade.Window):
             self.player1.to_down()
 
         if symbol == arcade.key.C:
-            bomb = Bomb()
-            bomb.center_x = justify_x(self.player1.center_x)
-            bomb.center_y = justify_y(self.player1.center_y)
-            self.player1_bombs.append(bomb)
+            if len(self.player1_bombs) < self.player1.bombs_count:
+                bomb = Bomb()
+                bomb.center_x = justify_x(self.player1.center_x)
+                bomb.center_y = justify_y(self.player1.center_y)
+                self.player1_bombs.append(bomb)
 
 
         self.player1.change_costume()
