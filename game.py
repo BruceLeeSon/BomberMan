@@ -1,5 +1,6 @@
 import arcade
 
+
 import animate
 import constants
 import random
@@ -23,17 +24,45 @@ def justify_y(position_y):
 
 
 class Bomb(animate.Animate):
-    def __init__(self):
+    def __init__(self, window, power = 3):
         super().__init__("Bomb/Bomb_f00.png", 0.7)
         for i in range(3):
             self.append_texture(arcade.load_texture(f"Bomb/Bomb_f0{i}.png"))
         self.spawn_time = time.time()
+        self.window = window
+        self.power = power
 
     def update(self):
         if time.time() - self.spawn_time > 3:
             exp = Explosion()
             exp.center_x = self.center_x
             exp.center_y = self.center_y
+            self.window.explosions.append(exp)
+
+            for i in range(1, self.power):
+                exp1 = Explosion()
+                exp1.center_x = self.center_x - constants.CELL_WIDTH * i
+                exp1.center_y = self.center_y
+                self.window.explosions.append(exp1)
+
+                exp2 = Explosion()
+                exp2.center_x = self.center_x + constants.CELL_WIDTH * i
+                exp2.center_y = self.center_y
+                self.window.explosions.append(exp2)
+
+                exp3 = Explosion()
+                exp3.center_x = self.center_x
+                exp3.center_y = self.center_y + constants.CELL_HEIGHT * i
+                self.window.explosions.append(exp3)
+
+                exp4 = Explosion()
+                exp4.center_x = self.center_x
+                exp4.center_y = self.center_y - constants.CELL_HEIGHT * i
+                self.window.explosions.append(exp4)
+
+            self.kill()
+
+
 
 class ExplodableBlock(arcade.Sprite):
     def __init__(self):
@@ -50,16 +79,28 @@ class Explosion(animate.Animate):
         for i in range(5):
             self.append_texture(arcade.load_texture(f"Flame/Flame_f0{i}.png"))
 
+        self.spawn_time = time.time()
+
+    def update(self):
+        if time.time() - self.spawn_time > 3:
+            self.kill()
+
+
+
 class Game(arcade.Window):
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
         self.bg_tile = arcade.load_texture("Blocks/BackgroundTile.png")
+
         self.solid_blocks = arcade.SpriteList()
         self.explodable_blocks = arcade.SpriteList()
-        self.player1 = BomberMan(self, constants.PLAYER1_SPEED, constants.PLAYER1_BOMB_COUNT)
-        self.player2 = BomberMan(self, constants.PLAYER2_SPEED, constants.PLAYER2_BOMB_COUNT)
+        self.explosions = arcade.SpriteList()
+
+        self.player1 = BomberMan(self, constants.PLAYER1_SPEED, constants.PLAYER1_BOMB_COUNT, constants.PLAYER1_POWER)
+        self.player2 = BomberMan(self, constants.PLAYER2_SPEED, constants.PLAYER2_BOMB_COUNT, constants.PLAYER2_POWER)
 
         self.player1_bombs = arcade.SpriteList()
+        self.player2_bombs = arcade.SpriteList()
 
     def setup(self):
         for y in range(constants.ROW_COUNT):
@@ -101,12 +142,17 @@ class Game(arcade.Window):
     def on_draw(self):
         self.clear((255, 255, 255))
         self.draw_background()
+
         self.solid_blocks.draw()
         self.explodable_blocks.draw()
+        self.explosions.draw()
+
         self.player1.draw()
         self.player2.draw()
 
         self.player1_bombs.draw()
+        self.player2_bombs.draw()
+
 
     def update(self, delta_time: float):
         self.player1.update_animation(delta_time)
@@ -118,7 +164,20 @@ class Game(arcade.Window):
         self.player1_bombs.update()
         self.player1_bombs.update_animation(delta_time)
 
+        self.player2_bombs.update()
+        self.player2_bombs.update_animation(delta_time)
+
+        self.explosions.update()
+        self.explosions.update_animation(delta_time)
+
+        for flame in self.explosions:
+            touched_blocks = arcade.check_for_collision_with_list(flame, self.explodable_blocks)
+            if len(touched_blocks) > 0:
+                for block in touched_blocks:
+                    block.kill()
+
     def on_key_press(self, symbol: int, modifiers: int):
+        # PLAYER 1
         if symbol == arcade.key.LEFT:
             self.player1.to_left()
         elif symbol == arcade.key.RIGHT:
@@ -130,7 +189,7 @@ class Game(arcade.Window):
 
         if symbol == arcade.key.C:
             if len(self.player1_bombs) < self.player1.bombs_count:
-                bomb = Bomb()
+                bomb = Bomb(self, self.player1.power)
                 bomb.center_x = justify_x(self.player1.center_x)
                 bomb.center_y = justify_y(self.player1.center_y)
                 self.player1_bombs.append(bomb)
@@ -148,7 +207,15 @@ class Game(arcade.Window):
         elif symbol == arcade.key.S:
             self.player2.to_down()
 
-        self.player2.change_costume()
+
+        if symbol == arcade.key.RSHIFT:
+            if len(self.player2_bombs) < self.player2.bombs_count:
+                bomb = Bomb(self, self.player2.power)
+                bomb.center_x = justify_x(self.player2.center_x)
+                bomb.center_y = justify_y(self.player2.center_y)
+                self.player2_bombs.append(bomb)
+
+                self.player2.change_costume()
 
 
     def on_key_release(self, symbol: int, modifiers: int):
