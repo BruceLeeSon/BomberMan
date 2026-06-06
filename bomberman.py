@@ -13,6 +13,7 @@ class BomberMan(animate.Animate):
         self.bombs_count = bombs_count
         self.window = window
         self.power = power
+        self.win = False
 
         self.walk_down_frames = []
         self.walk_up_frames = []
